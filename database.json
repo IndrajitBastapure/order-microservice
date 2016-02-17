@@ -1,0 +1,14 @@
+{
+  "dev": {
+    "driver": "mysql",
+    "user": "root",
+    "database": "shopping_portal",
+    "password": "root"
+  },
+ 
+  "production": {
+    "driver": "mysql",
+    "user": "root",
+    "database": "shopping_portal"
+  }
+}
