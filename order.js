@@ -37,13 +37,11 @@ var sequelize = new Sequelize(
 	var productId = req.body.productId;
 	var	unitPrice = req.body.unitPrice;
 	var	quantity = req.body.quantity;
-	var	orderTotal = req.body.orderTotal;
   
 	var order = OrderDAO.build({  userId: userId,
 			productId: productId,
 			unitPrice: unitPrice,
-			quantity: quantity,
-			orderTotal: orderTotal });
+			quantity: quantity });
 
 	order.add(function(success){
 		res.json({ message: 'User created!' });
@@ -80,8 +78,7 @@ router.route('/orders/:id')
 	order.productId = req.body.productId;
 	order.unitPrice = req.body.unitPrice;
 	order.quantity = req.body.quantity;
-	order.orderTotal = req.body.orderTotal;
-	console.log('-----------'+req.params.id);
+	
 	order.updateById(req.params.id, function(success) {
 		console.log(success);
 		if (success) {	

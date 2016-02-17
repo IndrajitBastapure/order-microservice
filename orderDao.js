@@ -35,7 +35,6 @@ module.exports = function(sequelize, DataTypes) {
 			.then(onSuccess).error(onError);	
 	  },
       retrieveById: function(order_id, onSuccess, onError) {
-		console.log('----------DAO-retrieve--'+order_id);
 		Order.find({where: {id: order_id}}, {raw: true})
 			.then(onSuccess).error(onError);	
 	  },
@@ -44,7 +43,7 @@ module.exports = function(sequelize, DataTypes) {
 		var productId = this.productId;
 		var	unitPrice = this.unitPrice;
 		var	quantity = this.quantity;
-		var	orderTotal = this.orderTotal;
+		var	orderTotal = unitPrice * quantity;
 			
 		Order.build({ userId: userId,
 			productId: productId,
@@ -56,16 +55,12 @@ module.exports = function(sequelize, DataTypes) {
 	  updateById: function(order_id, onSuccess, onError) {
 		var userId = this.userId;
 		var unitPrice = this.unitPrice;
-		var orderTotal = this.orderTotal;
-		console.log('----------DAO-update-order_id-'+order_id);
-		console.log('----------DAO-update-orderTotal-'+orderTotal);
-		console.log('----------DAO-update-userId-'+userId);
-		console.log('----------DAO-update-unitPrice-'+unitPrice);
+		var quantity = this.quantity;
+		var orderTotal = unitPrice * quantity;
 		Order.update({id : order_id, user_id : userId, unitPrice : unitPrice, orderTotal : orderTotal}, { where :{id : order_id}})
 			.then(onSuccess).error(onError);
 	   },
-      removeById: function(order_id, onSuccess, onError) {
-	    console.log('----------DAO-destroy-order_id-'+order_id);
+      removeById: function(order_id, onSuccess, onError) {	    
 		Order.destroy({ where :{id: order_id}}).then(onSuccess).error(onError);
 	  }
     }
