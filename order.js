@@ -37,7 +37,14 @@ var sequelize = new Sequelize(
 	var productId = req.body.productId;
 	var	unitPrice = req.body.unitPrice;
 	var	quantity = req.body.quantity;
-  
+	
+	if(!userId || !productId || !unitPrice || !quantity)
+	{
+		res.status(400).send("Bad Request. Please check your JSON request.");
+		console.log("ERROR 400: Bad Request. Please check your JSON request format.");
+		return;
+	}
+	
 	var order = OrderDAO.build({  userId: userId,
 			productId: productId,
 			unitPrice: unitPrice,
@@ -46,7 +53,7 @@ var sequelize = new Sequelize(
 	order.add(function(success){
 		res.json({ message: 'User created!' });
 	},
-	function(err) {
+	function(err) {		
 		res.send(err);
 	});
 })
@@ -59,7 +66,7 @@ var sequelize = new Sequelize(
 		if (order) {
 		  res.json(order);
 		} else {
-		  res.send(401, "Order not found");
+		  res.status(404).send("No order found");
 		}
 	  }, function(error) {
 		res.send("Order not found");
@@ -74,17 +81,23 @@ router.route('/orders/:id')
 
 	var order = OrderDAO.build();
 	
-	order.userId = req.body.userId;
-	order.productId = req.body.productId;
 	order.unitPrice = req.body.unitPrice;
 	order.quantity = req.body.quantity;
 	
-	order.updateById(req.params.id, function(success) {
-		console.log(success);
-		if (success) {	
-			res.json({ message: 'order updated!' });
+	if(!order.unitPrice || !order.quantity)
+	{
+		res.status(400).send("Bad Request. Please check your JSON request.");
+		console.log("ERROR 400: Bad Request. Please check your JSON request format.");
+		return;
+	}
+	
+	order.updateById(req.params.id, function(orders) {
+		if (orders > 0) {
+			console.log("200 OK: order with id "+req.params.id+" updated");
+			res.json({ message: 'order with id '+req.params.id+' updated!' });
 		} else {
-		  res.send(401, "order not found");
+		  console.log("ERROR 404: order with id "+req.params.id+" not found");
+		  res.status(404).send("order with id "+req.params.id+" not found");
 		}
 	  }, function(error) {
 		res.send(error);
@@ -94,13 +107,14 @@ router.route('/orders/:id')
 
 // get a order by id(accessed at GET http://localhost:8080/api/orders/:id)
 .get(function(req, res) {
-	var order = OrderDAO.build();
-	console.log('-----------'+req.params.id);
+	var order = OrderDAO.build();	
 	order.retrieveById(req.params.id, function(orders) {
 		if (orders) {
-		  res.json(orders);
+			console.log("200 OK: order with id "+req.params.id+" retrieved");
+			res.json(orders);
 		} else {
-		  res.send(401, "order not found");
+		  console.log("ERROR 404: order with id "+req.params.id+" not found");
+		  res.status(404).send("order with id "+req.params.id+" not found");
 		}
 	  }, function(error) {
 		res.send("order not found");
@@ -110,12 +124,13 @@ router.route('/orders/:id')
 // delete a order by id (accessed at DELETE http://localhost:8080/api/orders/:id)
 .delete(function(req, res) {
 	var order = OrderDAO.build();
-	console.log('-----------'+req.params.id);
 	order.removeById(req.params.id, function(order) {
 		if (order) {
-		  res.json({ message: 'order removed!' });
+			console.log("200 OK: order with id "+req.params.id+" removed");
+			res.json({ message: 'order with id '+req.params.id+' removed!' });
 		} else {
-		  res.send(401, "order not found");
+		  console.log("ERROR 404: order with id "+req.params.id+" not found");
+		  res.status(404).send("order with id "+req.params.id+" not found");
 		}
 	  }, function(error) {
 		res.send("order not found");

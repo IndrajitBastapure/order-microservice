@@ -53,11 +53,10 @@ module.exports = function(sequelize, DataTypes) {
 			.save().then(onSuccess).error(onError);
 	   },
 	  updateById: function(order_id, onSuccess, onError) {
-		var userId = this.userId;
 		var unitPrice = this.unitPrice;
 		var quantity = this.quantity;
 		var orderTotal = unitPrice * quantity;
-		Order.update({id : order_id, user_id : userId, unitPrice : unitPrice, orderTotal : orderTotal}, { where :{id : order_id}})
+		Order.update({unitPrice : unitPrice, quantity : quantity, orderTotal : orderTotal}, {where: {id: order_id}})
 			.then(onSuccess).error(onError);
 	   },
       removeById: function(order_id, onSuccess, onError) {	    
