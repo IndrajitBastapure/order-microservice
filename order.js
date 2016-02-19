@@ -57,10 +57,11 @@ var sequelize = new Sequelize(
 		return;
 	}
 	
-	if((userId === parseInt(userId, 10)) 
-		|| (productId === parseInt(productId, 10)) 
-		|| (quantity === parseInt(quantity, 10))
-		|| (!(status == "completed"))) {
+	if(!(userId == parseInt(userId, 10)) 
+		|| !(productId == parseInt(productId, 10)) 
+		|| !(unitPrice == parseFloat(unitPrice, 10))
+		|| !(quantity == parseInt(quantity, 10))
+		|| !(status == "completed")) {
 		json = JSON.stringify({
 			status: 400,
 			description: "Incorrect JSON",
