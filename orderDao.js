@@ -24,6 +24,10 @@ module.exports = function(sequelize, DataTypes) {
   orderTotal: {
 	type: DataTypes.FLOAT,
 	field: 'order_total'
+  },
+  status: {
+	type: DataTypes.STRING,
+	field: 'status'
   }
   },{
 	timestamps: false,
@@ -44,25 +48,23 @@ module.exports = function(sequelize, DataTypes) {
 		var	unitPrice = this.unitPrice;
 		var	quantity = this.quantity;
 		var	orderTotal = unitPrice * quantity;
+		var status = this.status;
 			
 		Order.build({ userId: userId,
 			productId: productId,
 			unitPrice: unitPrice,
 			quantity: quantity,
-			orderTotal: orderTotal })
+			orderTotal: orderTotal,
+			status: status })
 			.save().then(onSuccess).error(onError);
 	   },
 	  updateById: function(order_id, onSuccess, onError) {
-		var unitPrice = this.unitPrice;
-		var quantity = this.quantity;
-		var orderTotal = unitPrice * quantity;
-		Order.update({unitPrice : unitPrice, quantity : quantity, orderTotal : orderTotal}, {where: {id: order_id}})
+		var status = this.status;
+		Order.update({status : status}, {where: {id: order_id}})
 			.then(onSuccess).error(onError);
-	   },
-      removeById: function(order_id, onSuccess, onError) {	    
-		Order.destroy({ where :{id: order_id}}).then(onSuccess).error(onError);
-	  }
+	   }
     }
   });
+  Order.sync();
 	return Order;
 }

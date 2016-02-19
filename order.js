@@ -25,116 +25,284 @@ var sequelize = new Sequelize(
 );
 
   var OrderDAO = sequelize.import("./orderDao");
-
+  
   var router = express.Router();
   
-  router.route('/orders')
+  router.route('/order/insert')
   
-	// create a order (accessed at POST http://localhost:8080/api/orders)
+	// create a order (accessed at POST http://localhost:8080/api/order/insert)
 	.post(function(req, res) {
 
 	var userId = req.body.userId;
 	var productId = req.body.productId;
 	var	unitPrice = req.body.unitPrice;
 	var	quantity = req.body.quantity;
-	
-	if(!userId || !productId || !unitPrice || !quantity)
+	var status = req.body.status;
+	var json;
+	if(!userId || !productId || !unitPrice || !quantity || !status)
 	{
-		res.status(400).send("Bad Request. Please check your JSON request.");
-		console.log("ERROR 400: Bad Request. Please check your JSON request format.");
+		json = JSON.stringify({
+			status: 422,
+			description: "Missing data",
+			errors: [
+				{
+					msg : "Missing a required param in Json. Please check your JSON request."
+				}
+			],
+			data : []
+		});
+	
+		res.send(json);
+		console.log("ERROR 422: Missing a required param in Json. Please check your JSON request.");
+		return;
+	}
+	
+	if((userId === parseInt(userId, 10)) 
+		|| (productId === parseInt(productId, 10)) 
+		|| (quantity === parseInt(quantity, 10))
+		|| (!(status == "completed"))) {
+		json = JSON.stringify({
+			status: 400,
+			description: "Incorrect JSON",
+			errors: [
+				{
+					msg : "Incorrect Json request. Please check your JSON request."
+				}
+			],
+			data : []
+		});
+		res.send(json);
+		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");
 		return;
 	}
 	
 	var order = OrderDAO.build({  userId: userId,
 			productId: productId,
 			unitPrice: unitPrice,
-			quantity: quantity });
+			quantity: quantity,
+			status: status	});
 
 	order.add(function(success){
-		res.json({ message: 'User created!' });
+		json = JSON.stringify({
+			status: 200,
+			description: "Order Created!",
+			errors: [],
+			data : [
+				{
+					orderId : success.id
+				}
+			]
+		});	
+		res.send(json);		
 	},
-	function(err) {		
-		res.send(err);
+	function(err) {
+		json = JSON.stringify({
+				status : 500,
+				description : "Internal server error",
+				errors: [
+				  {
+					  msg : error
+				  }
+				],
+				data : []
+			});
+			res.send(json);
 	});
-})
+});
 
+router.route('/orders')
 // get all the orders (accessed at GET http://localhost:8080/api/orders)
 .get(function(req, res) {
 	var order = OrderDAO.build();
-	
+	var json;
 	order.retrieveAll(function(order) {
 		if (order) {
-		  res.json(order);
+		
+		json = JSON.stringify({
+			status: 200,
+			description: "Returning the orders",
+			errors: [],
+			data : [
+				{
+					orders : order
+				}
+			]
+		});
+		
+		res.send(json);
 		} else {
-		  res.status(404).send("No order found");
+			json = JSON.stringify({
+				status : 404,
+				description : "No orders found",
+				errors: [
+				  {
+					  msg : "No orders found"
+				  }
+				],
+				data : []
+			});
+			res.send(json);
 		}
 	  }, function(error) {
-		res.send("Order not found");
+			json = JSON.stringify({
+				status : 500,
+				description : "Internal server error",
+				errors: [
+				  {
+					  msg : error
+				  }
+				],
+				data : []
+			});
+			res.send(json);
 	  });
 });
 
 
-router.route('/orders/:id')
+router.route('/order/:id')
 
-// update a order (accessed at PUT http://localhost:8080/api/orders/:id)
-.put(function(req, res) {
+// get a order by id(accessed at GET http://localhost:8080/api/order/:id)
+.get(function(req, res) {
+	var order = OrderDAO.build();
+	var json;
+	order.retrieveById(req.params.id, function(order) {
+		if (order) {
+			console.log("200 OK: order with id "+req.params.id+" retrieved");
+			var orderArray = [ order ];
+			json = JSON.stringify({
+			status : 200,
+			description : "Returning the order",
+			errors: [],
+			data : [
+				{
+					order : orderArray
+				}
+			]
+		});
+		res.send(json);
+		} else {
+		  console.log("ERROR 404: order with id "+req.params.id+" not found");
+		  json = JSON.stringify({
+			status : 404,
+			description : "No data found",
+			errors: [
+			  {
+				  msg : "order with id "+req.params.id+" not found"
+			  }
+			],
+			data : []
+		  });
+		  res.send(json);
+		}
+	  }, function(error) {
+		json = JSON.stringify({
+			status : 500,
+			description : "Internal server error",
+			errors: [
+			  {
+				  msg : error
+			  }
+			],
+			data : []
+		});
+		res.send(json);
+	  });
+});
+
+router.route('/order/update/:id')
+
+// update a order (accessed at POST http://localhost:8080/api/order/update/:id)
+.post(function(req, res) {
 
 	var order = OrderDAO.build();
+	var json;
+	order.status = req.body.status;
 	
-	order.unitPrice = req.body.unitPrice;
-	order.quantity = req.body.quantity;
-	
-	if(!order.unitPrice || !order.quantity)
+	if(!order.status)
 	{
-		res.status(400).send("Bad Request. Please check your JSON request.");
-		console.log("ERROR 400: Bad Request. Please check your JSON request format.");
+		json = JSON.stringify({
+			status: 422,
+			description: "Missing data",
+			errors: [
+				{
+					msg : "Missing a required param in Json. Please check your JSON request."
+				}
+			],
+			data : []
+		});
+	
+		res.send(json);
+		console.log("ERROR 422: Missing a required param in Json. Please check your JSON request.");
+		
+		return;
+	}
+	
+	if(!(order.status == "cancel")) {
+		json = JSON.stringify({
+			status: 400,
+			description: "Incorrect JSON",
+			errors: [
+				{
+					msg : "Incorrect Json request. Please check your JSON request."
+				}
+			],
+			data : []
+		});
+		res.send(json);
+		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");
 		return;
 	}
 	
 	order.updateById(req.params.id, function(orders) {
 		if (orders > 0) {
-			console.log("200 OK: order with id "+req.params.id+" updated");
-			res.json({ message: 'order with id '+req.params.id+' updated!' });
+			console.log("200 OK: order with id "+req.params.id+" updated");	
+			
+			json = JSON.stringify({
+			status: 200,
+			description: "Order updated!",
+			errors: [],
+			data : [
+					{
+						orderId : req.params.id
+					}
+				]
+			});
+			
+			res.send(json);
+		
 		} else {
-		  console.log("ERROR 404: order with id "+req.params.id+" not found");
-		  res.status(404).send("order with id "+req.params.id+" not found");
+			  console.log("ERROR 404: order with id "+req.params.id+" not found");
+			  
+			  json = JSON.stringify({
+				status : 404,
+				description : "No data found",
+				errors: [
+				  {
+					  msg : "order with id "+req.params.id+" not found"
+				  }
+				],
+				data : []
+			  });
+			  
+			  res.send(json);		  
 		}
 	  }, function(error) {
-		res.send(error);
+			console.log("ERROR 500: Internal server error : "+error);
+			json = JSON.stringify({
+			status : 500,
+			description : "Internal server error",
+			errors: [
+			  {
+				  msg : error
+			  }
+			],
+			data : []
+			});
+			
+			res.send(json);
+		
 	  });
 	
-})
-
-// get a order by id(accessed at GET http://localhost:8080/api/orders/:id)
-.get(function(req, res) {
-	var order = OrderDAO.build();	
-	order.retrieveById(req.params.id, function(orders) {
-		if (orders) {
-			console.log("200 OK: order with id "+req.params.id+" retrieved");
-			res.json(orders);
-		} else {
-		  console.log("ERROR 404: order with id "+req.params.id+" not found");
-		  res.status(404).send("order with id "+req.params.id+" not found");
-		}
-	  }, function(error) {
-		res.send("order not found");
-	  });
-})
-
-// delete a order by id (accessed at DELETE http://localhost:8080/api/orders/:id)
-.delete(function(req, res) {
-	var order = OrderDAO.build();
-	order.removeById(req.params.id, function(order) {
-		if (order) {
-			console.log("200 OK: order with id "+req.params.id+" removed");
-			res.json({ message: 'order with id '+req.params.id+' removed!' });
-		} else {
-		  console.log("ERROR 404: order with id "+req.params.id+" not found");
-		  res.status(404).send("order with id "+req.params.id+" not found");
-		}
-	  }, function(error) {
-		res.send("order not found");
-	  });
 });
 
 // Middleware to use for all requests
@@ -145,6 +313,40 @@ router.use(function(req, res, next) {
 });
 
 app.use('/api', router);
+
+app.use(function(req, res, next){
+  res.status(503);
+  json = JSON.stringify({
+			status : 503,
+			description : "Invalid service URL",
+			errors: [
+			  {
+				  msg : "Service Unavailable : Cannot "+req.method+" " + req.url
+			  }
+			],
+			data : []
+  });
+  res.send(json);
+  return;
+});
+
+app.use(function(err, req, res, next) {
+if(err.status == 400){
+   json = JSON.stringify({
+    status : 400,
+    description : "Bad request",
+	errors : [
+		{
+			msg : "Unparsable Json request"
+		}
+	],
+    data : []
+    
+   });
+   res.send(json);
+   return;
+  }
+});
 
 app.listen(port);
 console.log('Magic happens on port ' + port);
