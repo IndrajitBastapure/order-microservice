@@ -1,17 +1,9 @@
 var express = require('express');
-var	bodyParser = require('body-parser');
-
-var app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-var port = 8080;
-var mysql = require("mysql");
+var router = express.Router();
 var Sequelize = require('sequelize');
 // db config
 var env = "dev";
-var config = require('./database.json')[env];
-var password = config.password ? config.password : null;
+var config = require('../database.json')[env];
 
 // initialize database connection
 var sequelize = new Sequelize(
@@ -24,9 +16,7 @@ var sequelize = new Sequelize(
 	}
 );
 
-  var OrderDAO = sequelize.import("./orderDao");
-  
-  var router = express.Router();
+  var OrderDAO = sequelize.import("./orderDao");  
   
   router.route('/order/insert')
   
@@ -238,7 +228,58 @@ router.route('/order/update/:id')
 		return;
 	}
 	
-	if(!(order.status == "cancel")) {
+	if(order.status === "cancel") {
+			order.updateById(req.params.id, function(orders) {
+				if (orders > 0) {
+					console.log("200 OK: order with id "+req.params.id+" updated");	
+					
+					json = JSON.stringify({
+					status: 200,
+					description: "Order updated!",
+					errors: [],
+					data : [
+							{
+								orderId : req.params.id
+							}
+						]
+					});
+					
+					res.send(json);
+				
+				} else {
+					  console.log("ERROR 404: order with id "+req.params.id+" not found");
+					  
+					  json = JSON.stringify({
+						status : 404,
+						description : "No data found",
+						errors: [
+						  {
+							  msg : "order with id "+req.params.id+" not found"
+						  }
+						],
+						data : []
+					  });
+					  
+					  res.send(json);		  
+				}
+			  }, function(error) {
+					console.log("ERROR 500: Internal server error : "+error);
+					json = JSON.stringify({
+					status : 500,
+					description : "Internal server error",
+					errors: [
+					  {
+						  msg : error
+					  }
+					],
+					data : []
+					});
+					
+					res.send(json);
+			  });
+		return;
+	  }
+	
 		json = JSON.stringify({
 			status: 400,
 			description: "Incorrect JSON",
@@ -250,59 +291,7 @@ router.route('/order/update/:id')
 			data : []
 		});
 		res.send(json);
-		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");
-		return;
-	}
-	
-	order.updateById(req.params.id, function(orders) {
-		if (orders > 0) {
-			console.log("200 OK: order with id "+req.params.id+" updated");	
-			
-			json = JSON.stringify({
-			status: 200,
-			description: "Order updated!",
-			errors: [],
-			data : [
-					{
-						orderId : req.params.id
-					}
-				]
-			});
-			
-			res.send(json);
-		
-		} else {
-			  console.log("ERROR 404: order with id "+req.params.id+" not found");
-			  
-			  json = JSON.stringify({
-				status : 404,
-				description : "No data found",
-				errors: [
-				  {
-					  msg : "order with id "+req.params.id+" not found"
-				  }
-				],
-				data : []
-			  });
-			  
-			  res.send(json);		  
-		}
-	  }, function(error) {
-			console.log("ERROR 500: Internal server error : "+error);
-			json = JSON.stringify({
-			status : 500,
-			description : "Internal server error",
-			errors: [
-			  {
-				  msg : error
-			  }
-			],
-			data : []
-			});
-			
-			res.send(json);
-		
-	  });
+		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");	
 	
 });
 
@@ -313,41 +302,4 @@ router.use(function(req, res, next) {
 	next();
 });
 
-app.use('/api', router);
-
-app.use(function(req, res, next){
-  res.status(503);
-  json = JSON.stringify({
-			status : 503,
-			description : "Invalid service URL",
-			errors: [
-			  {
-				  msg : "Service Unavailable : Cannot "+req.method+" " + req.url
-			  }
-			],
-			data : []
-  });
-  res.send(json);
-  return;
-});
-
-app.use(function(err, req, res, next) {
-if(err.status == 400){
-   json = JSON.stringify({
-    status : 400,
-    description : "Bad request",
-	errors : [
-		{
-			msg : "Unparsable Json request"
-		}
-	],
-    data : []
-    
-   });
-   res.send(json);
-   return;
-  }
-});
-
-app.listen(port);
-console.log('Magic happens on port ' + port);
+module.exports = router;
