@@ -202,8 +202,8 @@ router.route('/order/:id')
 
 router.route('/order/update/:id')
 
-// update a order (accessed at POST http://localhost:8080/api/order/update/:id)
-.post(function(req, res) {
+// update a order (accessed at PUT http://localhost:8080/api/order/update/:id)
+.put(function(req, res) {
 
 	var order = OrderDAO.build();
 	var json;
