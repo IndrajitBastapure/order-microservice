@@ -3,12 +3,14 @@ var	bodyParser = require('body-parser');
 var mysql = require("mysql");
 
 var order = require('./routes/order');
+var health = require('./routes/health');
 
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api', order);
+app.use('/', health);
 
 //set the server environment
 var env = app.get('env') == 'development' ? 'dev' : app.get('env');
