@@ -7,12 +7,20 @@
 var app = require('../app');
 var debug = require('debug')('order-service:server');
 var http = require('http');
+var os = require('os');
+var consul = require('consul')();
+
+/*
+ * Constants
+ */
+
+const ORDER_SERVICE_NAME = "order-service";
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
 
 /**
@@ -28,6 +36,7 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+server.on('close', onClose);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -86,5 +95,41 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
+  registerConsul(addr);
   debug('Listening on ' + bind);
+}
+
+function onClose() {
+  deregisterConsul();
+}
+
+function registerConsul(addr){
+  var serviceData = {
+    "name": ORDER_SERVICE_NAME
+  };
+  if(typeof addr !== 'string'){
+    serviceData.address = os.hostname();
+    serviceData.port = addr.port;
+    serviceData.tags = ["nodeJS"];
+    serviceData.check = {
+      "id": "api",
+      "name": "HTTP API on port " + addr.port,
+      "http": "http://" + os.hostname() + ":" + addr.port + "/health",
+      "interval": "20s",
+      "timeout": "1s"
+    }
+  } else {
+    serviceData.address = addr;
+  }
+  consul.agent.service.register(serviceData, function(err) {
+    if (err) throw err;
+    console.log("consul registration successful");
+  });
+}
+
+function deregisterConsul(){
+  consul.agent.service.deregister(ORDER_SERVICE_NAME, function(err) {
+    if (err) throw err;
+    console.log("deregistration successful");
+  });
 }
