@@ -31,7 +31,7 @@ var sequelize = new Sequelize(
 	var json;
 	if(!userId || !productId || !unitPrice || !quantity || !status)
 	{
-		json = JSON.stringify({
+		json = {
 			status: 422,
 			description: "Missing data",
 			errors: [
@@ -40,9 +40,9 @@ var sequelize = new Sequelize(
 				}
 			],
 			data : []
-		});
+		};
 	
-		res.send(json);
+		res.json(json);
 		console.log("ERROR 422: Missing a required param in Json. Please check your JSON request.");
 		return;
 	}
@@ -52,7 +52,7 @@ var sequelize = new Sequelize(
 		|| !(unitPrice == parseFloat(unitPrice, 10))
 		|| !(quantity == parseInt(quantity, 10))
 		|| !(status == "completed")) {
-		json = JSON.stringify({
+		json = {
 			status: 400,
 			description: "Incorrect JSON",
 			errors: [
@@ -61,8 +61,8 @@ var sequelize = new Sequelize(
 				}
 			],
 			data : []
-		});
-		res.send(json);
+		};
+		res.json(json);
 		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");
 		return;
 	}
@@ -74,7 +74,7 @@ var sequelize = new Sequelize(
 			status: status	});
 
 	order.add(function(success){
-		json = JSON.stringify({
+		json = {
 			status: 200,
 			description: "Order Created!",
 			errors: [],
@@ -83,11 +83,11 @@ var sequelize = new Sequelize(
 					orderId : success.id
 				}
 			]
-		});	
-		res.send(json);		
+		};
+		res.json(json);
 	},
 	function(err) {
-		json = JSON.stringify({
+		json = {
 				status : 500,
 				description : "Internal server error",
 				errors: [
@@ -96,46 +96,46 @@ var sequelize = new Sequelize(
 				  }
 				],
 				data : []
-			});
-			res.send(json);
+			};
+			res.json(json);
 	});
 });
 
-router.route('/orders')
+router.get('/orders',
 // get all the orders (accessed at GET http://localhost:8080/api/orders)
-.get(function(req, res) {
+function(req, res) {
 	var order = OrderDAO.build();
 	var json;
 	order.retrieveAll(function(order) {
-		if (order) {
+		if (order.length > 0) {
 		
-		json = JSON.stringify({
-			status: 200,
-			description: "Returning the orders",
-			errors: [],
-			data : [
+		json = {
+			"status": 200,
+			"description": "Returning the orders",
+			"errors": [],
+			"data" : [
 				{
 					orders : order
 				}
 			]
-		});
+		};
 		
-		res.send(json);
+		res.json(json);
 		} else {
-			json = JSON.stringify({
-				status : 404,
-				description : "No orders found",
-				errors: [
+			json = {
+				"status" : 404,
+				"description" : "No orders found",
+				"errors": [
 				  {
-					  msg : "No orders found"
+					  "msg" : "No orders found"
 				  }
 				],
-				data : []
-			});
-			res.send(json);
+				"data" : []
+			};
+			res.json(json);
 		}
 	  }, function(error) {
-			json = JSON.stringify({
+			json = {
 				status : 500,
 				description : "Internal server error",
 				errors: [
@@ -144,8 +144,8 @@ router.route('/orders')
 				  }
 				],
 				data : []
-			});
-			res.send(json);
+			};
+			res.json(json);
 	  });
 });
 
@@ -160,7 +160,7 @@ router.route('/order/:id')
 		if (order) {
 			console.log("200 OK: order with id "+req.params.id+" retrieved");
 			var orderArray = [ order ];
-			json = JSON.stringify({
+			json = {
 			status : 200,
 			description : "Returning the order",
 			errors: [],
@@ -169,11 +169,11 @@ router.route('/order/:id')
 					order : orderArray
 				}
 			]
-		});
-		res.send(json);
+		};
+		res.json(json);
 		} else {
 		  console.log("ERROR 404: order with id "+req.params.id+" not found");
-		  json = JSON.stringify({
+		  json = {
 			status : 404,
 			description : "No data found",
 			errors: [
@@ -182,11 +182,11 @@ router.route('/order/:id')
 			  }
 			],
 			data : []
-		  });
-		  res.send(json);
+		  };
+		  res.json(json);
 		}
 	  }, function(error) {
-		json = JSON.stringify({
+		json = {
 			status : 500,
 			description : "Internal server error",
 			errors: [
@@ -195,8 +195,8 @@ router.route('/order/:id')
 			  }
 			],
 			data : []
-		});
-		res.send(json);
+		};
+		res.json(json);
 	  });
 });
 
@@ -211,7 +211,7 @@ router.route('/order/update/:id')
 	
 	if(!order.status)
 	{
-		json = JSON.stringify({
+		json = {
 			status: 422,
 			description: "Missing data",
 			errors: [
@@ -220,10 +220,11 @@ router.route('/order/update/:id')
 				}
 			],
 			data : []
-		});
+		};
 	
-		res.send(json);
+		res.json(json);
 		console.log("ERROR 422: Missing a required param in Json. Please check your JSON request.");
+		console.log(req.body);
 		
 		return;
 	}
@@ -233,7 +234,7 @@ router.route('/order/update/:id')
 				if (orders > 0) {
 					console.log("200 OK: order with id "+req.params.id+" updated");	
 					
-					json = JSON.stringify({
+					json = {
 					status: 200,
 					description: "Order updated!",
 					errors: [],
@@ -242,14 +243,14 @@ router.route('/order/update/:id')
 								orderId : req.params.id
 							}
 						]
-					});
+					};
 					
-					res.send(json);
+					res.json(json);
 				
 				} else {
 					  console.log("ERROR 404: order with id "+req.params.id+" not found");
 					  
-					  json = JSON.stringify({
+					  json = {
 						status : 404,
 						description : "No data found",
 						errors: [
@@ -258,13 +259,13 @@ router.route('/order/update/:id')
 						  }
 						],
 						data : []
-					  });
+					  };
 					  
-					  res.send(json);		  
+					  res.json(json);
 				}
 			  }, function(error) {
 					console.log("ERROR 500: Internal server error : "+error);
-					json = JSON.stringify({
+					json = {
 					status : 500,
 					description : "Internal server error",
 					errors: [
@@ -273,14 +274,14 @@ router.route('/order/update/:id')
 					  }
 					],
 					data : []
-					});
+					};
 					
-					res.send(json);
+					res.json(json);
 			  });
 		return;
 	  }
 	
-		json = JSON.stringify({
+		json = {
 			status: 400,
 			description: "Incorrect JSON",
 			errors: [
@@ -289,8 +290,8 @@ router.route('/order/update/:id')
 				}
 			],
 			data : []
-		});
-		res.send(json);
+		};
+		res.json(json);
 		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");	
 	
 });
