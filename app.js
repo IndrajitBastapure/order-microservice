@@ -18,7 +18,7 @@ var port = process.env.PORT || 8080;
 
 app.use(function(req, res, next){
   res.status(503);
-  json = JSON.stringify({
+  json = {
 			status : 503,
 			description : "Invalid service URL",
 			errors: [
@@ -27,14 +27,14 @@ app.use(function(req, res, next){
 			  }
 			],
 			data : []
-  });
-  res.send(json);
+  };
+  res.json(json);
   return;
 });
 
 app.use(function(err, req, res, next) {
 if(err.status == 400){
-   json = JSON.stringify({
+   json = {
     status : 400,
     description : "Bad request",
 	errors : [
@@ -44,13 +44,9 @@ if(err.status == 400){
 	],
     data : []
     
-   });
-   res.send(json);
+   };
+   res.json(json);
    return;
   }
 });
-
-app.listen(port);
-console.log('Magic happens on port ' + port);
-
 module.exports = app;
