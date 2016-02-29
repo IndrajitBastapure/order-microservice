@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var Sequelize = require('sequelize');
 // db config
-var env = "dev";
+var env = 'dev';
+
 var config = require('../database.json')[env];
 
 // initialize database connection
@@ -41,7 +42,7 @@ var sequelize = new Sequelize(
 			],
 			data : []
 		};
-	
+		res.status(200);
 		res.json(json);
 		console.log("ERROR 422: Missing a required param in Json. Please check your JSON request.");
 		return;
@@ -52,6 +53,7 @@ var sequelize = new Sequelize(
 		|| !(unitPrice == parseFloat(unitPrice, 10))
 		|| !(quantity == parseInt(quantity, 10))
 		|| !(status == "completed")) {
+		res.status(200);
 		json = {
 			status: 400,
 			description: "Incorrect JSON",
@@ -132,6 +134,7 @@ function(req, res) {
 				],
 				"data" : []
 			};
+			res.status(200);
 			res.json(json);
 		}
 	  }, function(error) {
@@ -145,6 +148,7 @@ function(req, res) {
 				],
 				data : []
 			};
+			res.status(500);
 			res.json(json);
 	  });
 });
@@ -183,6 +187,7 @@ router.route('/order/:id')
 			],
 			data : []
 		  };
+		  res.status(200);
 		  res.json(json);
 		}
 	  }, function(error) {
@@ -196,6 +201,7 @@ router.route('/order/:id')
 			],
 			data : []
 		};
+		res.status(500);
 		res.json(json);
 	  });
 });
@@ -221,10 +227,9 @@ router.route('/order/update/:id')
 			],
 			data : []
 		};
-	
+		res.status(200);
 		res.json(json);
 		console.log("ERROR 422: Missing a required param in Json. Please check your JSON request.");
-		console.log(req.body);
 		
 		return;
 	}
@@ -260,7 +265,7 @@ router.route('/order/update/:id')
 						],
 						data : []
 					  };
-					  
+					  res.status(200);
 					  res.json(json);
 				}
 			  }, function(error) {
@@ -275,7 +280,7 @@ router.route('/order/update/:id')
 					],
 					data : []
 					};
-					
+					res.status(500);
 					res.json(json);
 			  });
 		return;
@@ -291,10 +296,43 @@ router.route('/order/update/:id')
 			],
 			data : []
 		};
+		res.status(200);
 		res.json(json);
 		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");	
 	
 });
+
+
+router.route('/orders/delete/:userId')
+.delete(function(req, res) {
+	console.log('------------- Deleting all orders for a particular user from db ------------');
+	var order = OrderDAO.build();
+	
+	order.deleteByUserId(req.params.userId, function(orders) {
+		if (orders > 0) {
+			console.log('--- orders with userId '+req.params.userId+' deleted!');
+		}
+		res.status(200);
+		res.json("--- orders with userId "+req.params.userId+" deleted!");
+	});
+
+});
+
+router.route('/orders/delete')
+.delete(function(req, res) {
+	console.log('------------- DELETING ALL RECORDS FROM DB ------------');
+	var order = OrderDAO.build();
+	
+	order.deleteAll(function(orders) {
+		if (orders > 0) {
+			console.log('--- orders deleted! ---');
+		}
+		res.status(200);
+		res.json("--- orders deleted! ---");
+	});
+
+});
+
 
 // Middleware to use for all requests
 router.use(function(req, res, next) {
