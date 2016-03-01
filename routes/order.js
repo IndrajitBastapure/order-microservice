@@ -53,7 +53,6 @@ var sequelize = new Sequelize(
 		|| !(unitPrice == parseFloat(unitPrice, 10))
 		|| !(quantity == parseInt(quantity, 10))
 		|| !(status == "completed")) {
-		res.status(200);
 		json = {
 			status: 400,
 			description: "Incorrect JSON",
@@ -64,6 +63,7 @@ var sequelize = new Sequelize(
 			],
 			data : []
 		};
+		res.status(200);
 		res.json(json);
 		console.log("ERROR 400: Incorrect value for a field in Json. Please check your JSON request.");
 		return;
