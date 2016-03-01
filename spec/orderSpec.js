@@ -83,12 +83,160 @@ describe('loading express', function () {
 	});
   });
   
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { productId : 100,
+				unitPrice : 10.0,
+				quantity : 25,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 100,
+				quantity : 25,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 100,
+				unitPrice : 25.0,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 100,
+				unitPrice : 25.0,
+				quantity : 15
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
   var order = { userId : "100000asdxc", 
 				productId : 15, 
 				unitPrice : 10.0, 
 				quantity : 25, 
 				status : "completed" 
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":400,"description":"Incorrect JSON","errors":\[{"msg":"Incorrect Json request. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
+  var order = { userId : 100000, 
+				productId : 15, 
+				unitPrice : "10.0adcasded", 
+				quantity : 25, 
+				status : "completed" 
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":400,"description":"Incorrect JSON","errors":\[{"msg":"Incorrect Json request. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
+  var order = { userId : 100000, 
+				productId : 15, 
+				unitPrice : 10.0, 
+				quantity : "25assdasewsda", 
+				status : "completed" 
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":400,"description":"Incorrect JSON","errors":\[{"msg":"Incorrect Json request. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
+  var order = { userId : 100000, 
+				productId : 15.56, 
+				unitPrice : 10.0, 
+				quantity : 25, 
+				status : "completed" 
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":400,"description":"Incorrect JSON","errors":\[{"msg":"Incorrect Json request. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
+  var order = { userId : 100000, 
+				productId : 15, 
+				unitPrice : 10.0, 
+				quantity : 25, 
+				status : 123
 			  };
 			  
   request(server)
@@ -198,7 +346,10 @@ describe('loading express', function () {
   
   it('responds to /api/order/update/<order_id> with missing parameter error', function testSlash(done) {
   var order = { 
-				userId : 100000
+				userId : 100000,
+				productId : 15,
+				unitPrice : 10.0,
+				quantity : 25
 			  };
 			  
   request(server)
