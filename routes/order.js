@@ -1,6 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var Sequelize = require('sequelize');
+var async = require('async');
+var ServiceProvider = require('./services');
+var request = require("request");
+var services = new ServiceProvider();
+
 // db config
 var env = 'dev';
 
@@ -69,38 +74,96 @@ var sequelize = new Sequelize(
 		return;
 	}
 	
-	var order = OrderDAO.build({  userId: userId,
-			productId: productId,
-			unitPrice: unitPrice,
-			quantity: quantity,
-			status: status	});
+	async.parallel([
+			function(callback){
+				services.getService("USERS-SERVICE", function(err, result){
+					var node = result[0];			
+					var url = "http://"+node.Address+":"+node.ServicePort+"/user/"+userId;						
+					request.get(url, function(error, response, body) {
+						body = JSON.parse(body);
+						callback(error, body);
+					});
+				});
+			},	
+			function(callback){
+				services.getService("PRODUCTS-SERVICE", function(err, result){
+					var node = result[0];			
+					var url = "http://"+node.Address+":"+node.ServicePort+"/product/"+productId;			
+					request.get(url, function(error, response, body) {
+						body = JSON.parse(body);
+						callback(error, body);
+					});
+				});
+			}
+		],
+		// optional callback
+		function(err, results){
+			var userResult = results[0];
+			var productResult = results[1];			
+			console.log(userResult);
+			if( userResult.status == 404 || userResult.data ==  null ) {
+				res.status(200);
+				json = {
+						status: 404,
+						description: "Order not created!",
+						errors: [
+							{
+								msg : "User with userId "+ userId +" does not exist. Please enter a valid user id."
+							}
+						],
+						data : []
+					};
+				res.json(json);
+			} else if( productResult.status == 404 || productResult.data ==  null ){
+				res.status(200);
+				json = {
+						status: 404,
+						description: "Order not created!",
+						errors: [
+							{
+								msg : "Product with productId "+ productId +" does not exist. Please enter a valid product id."
+							}
+						],
+						data : []
+					};
+				res.json(json);
+			} else {
+				//Actual order creation logic
+				var order = OrderDAO.build({  userId: userId,
+					productId: productId,
+					unitPrice: unitPrice,
+					quantity: quantity,
+					status: status	
+				});
 
-	order.add(function(success){
-		json = {
-			status: 200,
-			description: "Order Created!",
-			errors: [],
-			data : [
-				{
-					orderId : success.id
-				}
-			]
-		};
-		res.json(json);
-	},
-	function(err) {
-		json = {
-				status : 500,
-				description : "Internal server error",
-				errors: [
-				  {
-					  msg : error
-				  }
-				],
-				data : []
-			};
-			res.json(json);
-	});
+				order.add(function(success){
+					json = {
+						status: 200,
+						description: "Order Created!",
+						errors: [],
+						data : [
+							{
+								orderId : success.id
+							}
+						]
+					};
+					res.json(json);
+				},
+				function(err) {
+					json = {
+							status : 500,
+							description : "Internal server error",
+							errors: [
+							  {
+								  msg : err
+							  }
+							],
+							data : []
+						};
+						res.json(json);
+				});
+			}
+		});
 });
 
 router.get('/orders',
