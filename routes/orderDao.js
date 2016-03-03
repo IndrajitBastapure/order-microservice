@@ -40,7 +40,7 @@ module.exports = function(sequelize, DataTypes) {
 	  },
       retrieveById: function(order_id, onSuccess, onError) {
 		Order.find({where: {id: order_id}}, {raw: true})
-			.then(onSuccess).error(onError);	
+			.then(onSuccess).error(onError);
 	  },
       add: function(onSuccess, onError) {
 		var userId = this.userId;
@@ -62,6 +62,18 @@ module.exports = function(sequelize, DataTypes) {
 		var status = this.status;
 		Order.update({status : status}, {where: {id: order_id}})
 			.then(onSuccess).error(onError);
+	   },
+	   deleteByOrderId: function(order_id, onSuccess, onError) {
+		Order.destroy({where: {id: order_id}})
+			.then(onSuccess).error(onError);		
+	   },
+	   deleteByUserId: function(user_id, onSuccess, onError) {
+		Order.destroy({where: {userId: user_id}})
+			.then(onSuccess).error(onError);		
+	   },
+	   deleteAll: function(onSuccess, onError) {
+		Order.destroy({where: {}})
+			.then(onSuccess).error(onError);		
 	   }
     }
   });

@@ -17,13 +17,13 @@ var env = app.get('env') == 'development' ? 'dev' : app.get('env');
 var port = process.env.PORT || 8080;
 
 app.use(function(req, res, next){
-  res.status(503);
+  res.status(500);
   json = {
-			status : 503,
-			description : "Invalid service URL",
+			status : 500,
+			description : "Internal Server Error",
 			errors: [
 			  {
-				  msg : "Service Unavailable : Cannot "+req.method+" " + req.url
+				  msg : "Cannot "+req.method+" " + req.url
 			  }
 			],
 			data : []
