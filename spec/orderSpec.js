@@ -17,7 +17,7 @@ describe('loading express', function () {
     server.close();
   });
   
-  it('responds to /api/orders with statusCode 404 No orders found with no orders present in db', function testSlash(done) {
+  xit('responds to /api/orders with statusCode 404 No orders found with no orders present in db', function testSlash(done) {
 		request(server)
 		.get('/api/orders')
 		.set('Accept', 'application/json')
@@ -30,7 +30,7 @@ describe('loading express', function () {
   
   it('responds to /api/order/insert', function testSlash(done) {
   var order = { userId : 100000,
-				productId : 15,
+				productId : 6,
 				unitPrice : 10.0,
 				quantity : 25,
 				status : "completed"
@@ -52,7 +52,7 @@ describe('loading express', function () {
   });
   
   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
-  var order = "{ userId : 100000 productId : 15 unitPrice : 10.0, quantity : 25, status : \"completed\" }";
+  var order = "{ userId : 100000 productId : 6 unitPrice : 10.0, quantity : 25, status : \"completed\" }";
 			  
   request(server)
     .post('/api/order/insert')
@@ -155,9 +155,104 @@ describe('loading express', function () {
 	});
   });
   
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : "",
+				productId : 100,
+				unitPrice : 25.0,
+				quantity : 15,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : "",
+				unitPrice : 25.0,
+				quantity : 15,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 6,
+				unitPrice : "",
+				quantity : 15,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 6,
+				unitPrice : 23.52,
+				quantity : "",
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing parameter error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 6,
+				unitPrice : 23.52,
+				quantity : 50,
+				status : ""
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":422,"description":"Missing data","errors":\[{"msg":"Missing a required param in Json. Please check your JSON request."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
   var order = { userId : "100000asdxc", 
-				productId : 15, 
+				productId : 6, 
 				unitPrice : 10.0, 
 				quantity : 25, 
 				status : "completed" 
@@ -176,7 +271,7 @@ describe('loading express', function () {
   
   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
   var order = { userId : 100000, 
-				productId : 15, 
+				productId : 6, 
 				unitPrice : "10.0adcasded", 
 				quantity : 25, 
 				status : "completed" 
@@ -195,7 +290,7 @@ describe('loading express', function () {
   
   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
   var order = { userId : 100000, 
-				productId : 15, 
+				productId : 6, 
 				unitPrice : 10.0, 
 				quantity : "25assdasewsda", 
 				status : "completed" 
@@ -214,7 +309,7 @@ describe('loading express', function () {
   
   it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
   var order = { userId : 100000, 
-				productId : 15.56, 
+				productId : 6.56, 
 				unitPrice : 10.0, 
 				quantity : 25, 
 				status : "completed" 
@@ -233,7 +328,7 @@ describe('loading express', function () {
   
    it('responds to /api/order/insert with JSON validation error', function testSlash(done) {
   var order = { userId : 100000, 
-				productId : 15, 
+				productId : 6, 
 				unitPrice : 10.0, 
 				quantity : 25, 
 				status : 123
@@ -250,9 +345,47 @@ describe('loading express', function () {
 	});
   });
   
-  it('500 Internal Server Error', function testSlash(done) {
+  it('responds to /api/order/insert with missing user error', function testSlash(done) {
+  var order = { userId : -1,
+				productId : 6,
+				unitPrice : 10.0,
+				quantity : 25,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":404,"description":"Order not created!","errors":\[{"msg":"User with userId -1 does not exist. Please enter a valid user id."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds to /api/order/insert with missing product error', function testSlash(done) {
   var order = { userId : 100000,
-				productId : 15,
+				productId : -1,
+				unitPrice : 10.0,
+				quantity : 25,
+				status : "completed"
+			  };
+			  
+  request(server)
+    .post('/api/order/insert')
+	.type('json')
+	.expect('Content-Type', /json/)
+	.send(order)
+	.end(function (err, res) {
+		res.text.should.match(/{"status":404,"description":"Order not created!","errors":\[{"msg":"Product with productId -1 does not exist. Please enter a valid product id."}\],"data":\[\]}/);
+			done();
+	});
+  });
+  
+  it('responds with 500 Internal Server Error', function testSlash(done) {
+  var order = { userId : 100000,
+				productId : 6,
 				unitPrice : 10.0,
 				quantity : 25,
 				status : "completed" 
@@ -279,7 +412,7 @@ describe('loading express', function () {
 		});
   });
   
-  it('500 Internal Server Error', function testPath(done) {
+  it('responds with 500 Internal Server Error', function testPath(done) {
     request(server)
       .get('/api/orders/something_else')
 	  .end(function (err, res) {
@@ -309,7 +442,7 @@ describe('loading express', function () {
 		});
   });
   
-  it('500 Internal Server Error', function testPath(done) {
+  it('responds with 500 Internal Server Error', function testPath(done) {
     request(server)
       .get('/api/order/27/something_else')
       .end(function (err, res) {
@@ -347,7 +480,7 @@ describe('loading express', function () {
   it('responds to /api/order/update/<order_id> with missing parameter error', function testSlash(done) {
   var order = { 
 				userId : 100000,
-				productId : 15,
+				productId : 6,
 				unitPrice : 10.0,
 				quantity : 25
 			  };
@@ -379,7 +512,7 @@ describe('loading express', function () {
 	});
   });
   
-  it('500 Internal Server Error', function testSlash(done) {
+  it('responds with 500 Internal Server Error', function testSlash(done) {
 		var order = { status : "cancel" };
 			request(server)
 			.put('/api/orders/update/13/abc')

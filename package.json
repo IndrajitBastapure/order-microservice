@@ -4,14 +4,16 @@
   "private": true,
   "scripts": {
     "start": "set NODE_ENV=dev && node ./bin/www",
-	"test": "set NODE_ENV=test && mocha --reporter spec spec/orderSpec.js"
+    "test": "set NODE_ENV=test && mocha --reporter spec spec/orderSpec.js"
   },
   "dependencies": {
+    "async": "^1.5.2",
     "body-parser": "~1.13.2",
     "consul": "^0.23.0",
     "debug": "^2.2.0",
     "express": "^4.13.4",
     "mysql": "^2.10.2",
+    "request": "^2.69.0",
     "sequelize": "^3.19.2",
     "should": "^8.2.2"
   }
