@@ -12,6 +12,7 @@ var sequelize = new Sequelize(
 	config.user,
 	config.password,
 	{
+		host: process.env.MYSQL_PORT_3306_TCP_ADDR,
 		logging: console.log,
 		timestamp: false
 	}
