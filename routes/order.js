@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express');
 var router = express.Router();
 var Sequelize = require('sequelize');
@@ -53,11 +55,18 @@ var sequelize = new Sequelize(
 		return;
 	}
 	
-	if(!(userId == parseInt(userId, 10)) 
-		|| !(productId == parseInt(productId, 10)) 
-		|| !(unitPrice == parseFloat(unitPrice, 10))
-		|| !(quantity == parseInt(quantity, 10))
-		|| !(status == "completed")) {
+	var userIdCheck = (userId == parseInt(userId, 10));
+	var productIdCheck = (productId == parseInt(productId, 10));
+	var unitPriceCheck = (unitPrice == parseFloat(unitPrice, 10));
+	var quantityCheck = (quantity == parseInt(quantity, 10));
+	var statusCheck = (status == "completed");
+	
+	
+	if( !userIdCheck || 
+		! productIdCheck || 
+		! unitPriceCheck || 
+		! quantityCheck || 
+		! statusCheck ) {
 		json = {
 			status: 400,
 			description: "Incorrect JSON",

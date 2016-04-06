@@ -1,3 +1,7 @@
+"use strict";
+
+/* globals describe, it, beforeEach, afterEach, xit */
+
 var request = require('supertest');
 var app = require("../app");
 var should = require('should');
