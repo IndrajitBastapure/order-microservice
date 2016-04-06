@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function(sequelize, DataTypes) {
 	var Order = sequelize.define('order', {
     id: {
@@ -79,4 +81,4 @@ module.exports = function(sequelize, DataTypes) {
   });
   Order.sync();
 	return Order;
-}
+};

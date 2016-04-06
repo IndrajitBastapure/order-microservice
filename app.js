@@ -1,3 +1,5 @@
+"use strict";
+
 var express = require('express');
 var	bodyParser = require('body-parser');
 var mysql = require("mysql");
@@ -18,7 +20,7 @@ var port = process.env.PORT || 8080;
 
 app.use(function(req, res, next){
   res.status(500);
-  json = {
+  var json = {
 			status : 500,
 			description : "Internal Server Error",
 			errors: [
@@ -34,7 +36,7 @@ app.use(function(req, res, next){
 
 app.use(function(err, req, res, next) {
 if(err.status == 400){
-   json = {
+   var json = {
     status : 400,
     description : "Bad request",
 	errors : [
