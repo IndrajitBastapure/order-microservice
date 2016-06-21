@@ -12,6 +12,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', order);
 app.use('/', health);
 
+// *** temp text 3 to check git squash functionality ***
+
 //set the server environment
 var env = app.get('env') == 'development' ? 'dev' : app.get('env');
 var port = process.env.PORT || 8080;
