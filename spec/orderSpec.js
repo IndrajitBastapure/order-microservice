@@ -2,6 +2,8 @@ var request = require('supertest');
 var app = require("../app");
 var should = require('should');
 
+// *** temp text 2 to check git squash functionality ***
+
 describe('loading express', function () {
   var server;
   var orderId;
